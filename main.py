@@ -85,7 +85,7 @@ def acao_coletar():
 
 # Configuração da GUI
 app = tk.Tk()
-app.title("Pesal - Pesquisa Salarial")
+app.title("Automação - Pesquisa Salarial")
 app.geometry("500x400")
 
 # Campo de entrada para as URLs (múltiplas)
