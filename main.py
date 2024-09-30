@@ -80,12 +80,12 @@ def acao_coletar():
         messagebox.showinfo("Resultado", "Nenhum parágrafo encontrado.")
         return
     
-    salvar_em_docx(paragrafos_por_url, 'paragrafos_coletados_multiplos.docx')
-    messagebox.showinfo("Sucesso", "Parágrafos salvos em 'paragrafos_coletados_multiplos.docx'.")
+    salvar_em_docx(paragrafos_por_url, 'pesquisa_salarial.docx')
+    messagebox.showinfo("Sucesso", "Dados salvos em 'pesquisa_salarial.docx'.")
 
 # Configuração da GUI
 app = tk.Tk()
-app.title("Coletor de Parágrafos")
+app.title("Pesal - Pesquisa Salarial")
 app.geometry("500x400")
 
 # Campo de entrada para as URLs (múltiplas)
@@ -113,7 +113,7 @@ radio_dissidio = tk.Radiobutton(app, text="Dissídio", variable=var_opcao, value
 radio_dissidio.pack(pady=5)
 
 # Botão para coletar parágrafos
-botao_coletar = tk.Button(app, text="Coletar Parágrafos", command=acao_coletar)
+botao_coletar = tk.Button(app, text="Coletar Dados", command=acao_coletar)
 botao_coletar.pack(pady=20)
 
 # Iniciar a GUI
