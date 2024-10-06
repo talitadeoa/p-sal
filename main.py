@@ -6,14 +6,17 @@ from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup
 import docx
 from concurrent.futures import ThreadPoolExecutor
+from webdriver_manager.chrome import ChromeDriverManager
+
+# Defina as opções do Chrome
+chrome_options = Options()
+chrome_options.add_argument("--headless")  # Executa o Chrome em segundo plano
 
 # Função para coletar parágrafos de uma URL
 def coletar_paragrafos(url, paragrafo_inicial):
     try:
-        # Configurações do Chrome
-        chrome_options = Options()
-        chrome_options.add_argument("--headless")  # Executa o Chrome em segundo plano
-        service = Service(executable_path='caminho_para_seu_chromedriver')  # Substitua pelo caminho correto
+        # Usando Service e ChromeDriverManager para gerenciar o ChromeDriver
+        service = Service(ChromeDriverManager().install())
         driver = webdriver.Chrome(service=service, options=chrome_options)
 
         # Acessa a página
@@ -68,9 +71,9 @@ def acao_coletar():
     urls = [url.strip() for url in urls if url.strip()]
 
     # Define os parágrafos iniciais com base na escolha do usuário
-    if selecionado == "salario":
+    if selecionado == "Salario":
         paragrafo_inicial = 'Seu trecho inicial para Salário'  # Defina o texto inicial específico para Salário
-    elif selecionado == "dissidio":
+    elif selecionado == "Dissidio":
         paragrafo_inicial = 'Seu trecho inicial para Dissídio'  # Defina o texto inicial específico para Dissídio
 
     # Executa a coleta das URLs em paralelo com o parágrafo inicial selecionado
