@@ -10,7 +10,7 @@ import time
 from webdriver_manager.chrome import ChromeDriverManager
 
 # Função para extrair elementos com base em critérios predefinidos
-def extrair_elementos(url):
+def extrair_elementos(url, tipo):
     # Opções do Chrome para execução em segundo plano
     chrome_options = Options()
     chrome_options.add_argument("--headless")  # Executar em segundo plano
@@ -30,12 +30,18 @@ def extrair_elementos(url):
     soup = BeautifulSoup(html, 'html.parser')
     resultados = {}
 
-    # Tags e índices predefinidos
-    tags = {
-        'p': [0, 1],  # Extrai os dois primeiros parágrafos
-        'h1': [0],    # Extrai o primeiro título h1
-        'h2': [0, 1]  # Extrai os dois primeiros títulos h2
-    }
+    # Tags e índices predefinidos para cada tipo
+    if tipo == "salário":
+        tags = {
+            'p': [0, 1, 2, 7, ],  # Exemplo: extrai os três primeiros parágrafos para "salário"
+            'h2': [1, 13],  
+            'table': [3],
+        }
+    elif tipo == "dissídio":
+        tags = {
+            'p': [24, 26, 27, 28, 29],     # Exemplo: extrai o primeiro e o terceiro parágrafo para "dissídio"
+            'h2': [10, 11]  # Extrai os três primeiros títulos h2
+        }
 
     for tag, indices in tags.items():
         elementos = soup.find_all(tag)
@@ -61,23 +67,49 @@ def salvar_docx(resultados, arquivo):
 # Função chamada ao clicar no botão "Extrair"
 def extrair():
     url = url_entry.get()  # Captura a URL digitada no campo
+    cbo = cbo_entry.get()  # Captura o CBO digitado
+    local = local_entry.get()  # Captura o local digitado
+    tipo_selecionado = tipo_var.get()  # Captura o tipo selecionado
+
+    if not cbo or not local:
+        messagebox.showerror("Erro", "Por favor, insira o CBO e o Local.")
+        return
+
     try:
-        resultados = extrair_elementos(url)
-        arquivo = salvar_docx(resultados, 'resultados.docx')
-        messagebox.showinfo("Sucesso", f'Resultados salvos em {arquivo}')
+        resultados = extrair_elementos(url, tipo_selecionado)
+        arquivo = f'CBO {cbo} - {local}.docx'  # Nome do arquivo com CBO e local
+        salvar_docx(resultados, arquivo)
+        messagebox.showinfo("Sucesso", f'Dados coletados salvos em {arquivo}')
     except Exception as e:
         messagebox.showerror("Erro", str(e))
 
 # Criação da janela principal
 root = tk.Tk()
-root.title("Web Scraper")
+root.title("Automação - Pesquisa Salarial")
+root.geometry("500x400")
+
+# Variável para armazenar a opção selecionada pelo usuário
+tipo_var = tk.StringVar(value="salário")  # Valor padrão
 
 # Layout
-tk.Label(root, text="URL:").grid(row=0, column=0, padx=10, pady=5)
+tk.Label(root, text="Insira a URL:").grid(row=0, column=0, padx=10, pady=5)
 url_entry = tk.Entry(root, width=50)  # Campo de entrada para a URL
 url_entry.grid(row=0, column=1, padx=10, pady=5)
 
+tk.Label(root, text="CBO:").grid(row=1, column=0, padx=10, pady=5)
+cbo_entry = tk.Entry(root, width=20)  # Campo de entrada para o CBO
+cbo_entry.grid(row=1, column=1, padx=10, pady=5)
+
+tk.Label(root, text="Local:").grid(row=2, column=0, padx=10, pady=5)
+local_entry = tk.Entry(root, width=20)  # Campo de entrada para o Local
+local_entry.grid(row=2, column=1, padx=10, pady=5)
+
+# Opções de seleção para o tipo de extração
+tk.Radiobutton(root, text="Salário", variable=tipo_var, value="salário").grid(row=3, column=0, padx=10, pady=5)
+tk.Radiobutton(root, text="Dissídio", variable=tipo_var, value="dissídio").grid(row=3, column=1, padx=10, pady=5)
+
+# Botão para iniciar a extração
 extrair_button = tk.Button(root, text="Extrair", command=extrair)
-extrair_button.grid(row=1, column=0, columnspan=2, pady=20)
+extrair_button.grid(row=4, column=0, columnspan=2, pady=20)
 
 root.mainloop()
