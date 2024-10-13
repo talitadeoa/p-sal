@@ -77,7 +77,10 @@ def extrair():
 
     try:
         resultados = extrair_elementos(url, tipo_selecionado)
-        arquivo = f'CBO {cbo} - {local}.docx'  # Nome do arquivo com CBO e local
+        if tipo_selecionado == "salario":
+            arquivo = f'CBO {cbo} - {local} - Salário.docx'
+        elif tipo_selecionado == "dissidio":
+            arquivo = f'CBO {cbo} - {local} - Dissídio.docx'
         salvar_docx(resultados, arquivo)
         messagebox.showinfo("Sucesso", f'Dados coletados salvos em {arquivo}')
     except Exception as e:
@@ -105,8 +108,8 @@ local_entry = tk.Entry(root, width=20)  # Campo de entrada para o Local
 local_entry.grid(row=2, column=1, padx=10, pady=5)
 
 # Opções de seleção para o tipo de extração
-tk.Radiobutton(root, text="Salário", variable=tipo_var, value="salário").grid(row=3, column=0, padx=10, pady=5)
-tk.Radiobutton(root, text="Dissídio", variable=tipo_var, value="dissídio").grid(row=3, column=1, padx=10, pady=5)
+tk.Radiobutton(root, text="Salário", variable=tipo_var, value="salario").grid(row=3, column=0, padx=10, pady=5)
+tk.Radiobutton(root, text="Dissídio", variable=tipo_var, value="dissidio").grid(row=3, column=1, padx=10, pady=5)
 
 # Botão para iniciar a extração
 extrair_button = tk.Button(root, text="Extrair", command=extrair)
