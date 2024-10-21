@@ -94,7 +94,7 @@ def salvar_docx(resultados, arquivo):
 # Função chamada ao clicar no botão "Extrair"
 def extrair():
     # Recuperando as URLs do campo de texto
-    urls = url_entry.get("1.0", "end-1c").strip()  # .strip() remove espaços em branco no início e no fim
+    urls = url_entry.get().split(',')  # Captura as URLs digitadas no campo, separando por vírgula
     # Separando as URLs em uma lista
     tipo_selecionado = tipo_var.get()
 
@@ -114,6 +114,7 @@ def extrair():
     
     messagebox.showinfo("Sucesso", "Dados coletados e salvos com sucesso!")
 
+
 # Criação da janela principal
 root = tk.Tk()
 root.title("Automação - Pesquisa Salarial")
@@ -127,17 +128,17 @@ main_frame.pack(expand=True, padx=20, pady=20)  # Adicionando preenchimento ao r
 tipo_var = tk.StringVar(value="salario")  # Valor padrão
 
 # Layout
-tk.Label(main_frame, text="Insira as URLs (separadas por vírgula):").pack(padx=10, pady=30)
+tk.Label(main_frame, text="Insira as URLs (separadas por vírgula):").pack(padx=10, pady=10)
 
-# Campo de entrada para URLs (usando Text para aumentar a altura)
-url_entry = tk.Text(main_frame, height=5, width=50)  # Aumentando a altura
-url_entry.pack(padx=10, pady=5)
+# Campo de entrada para URLs (Entry em vez de Text)
+url_entry = tk.Entry(main_frame, width=60)  # Ajustando a largura
+url_entry.pack(padx=10, pady=10)
 
 # Frame para os botões de seleção
 tipo_frame = tk.Frame(main_frame)
 tipo_frame.pack(pady=10)
 
-# Opções de seleção para o tipo de extração
+# Adicionando cada opção manualmente como botões de rádio (sem loop)
 tk.Radiobutton(tipo_frame, text="Salário .docx", variable=tipo_var, value="salario").pack(anchor=tk.W, padx=10)
 tk.Radiobutton(tipo_frame, text="Dissídio .docx", variable=tipo_var, value="dissidio").pack(anchor=tk.W, padx=10)
 tk.Radiobutton(tipo_frame, text="Dissídio por estados .excel", variable=tipo_var, value="dissidio_estados").pack(anchor=tk.W, padx=10)
