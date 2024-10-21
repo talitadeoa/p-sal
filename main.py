@@ -8,10 +8,11 @@ from bs4 import BeautifulSoup
 from docx import Document
 import time
 import threading
+import re
 from webdriver_manager.chrome import ChromeDriverManager
 
 # Função para extrair elementos com base em critérios predefinidos
-def extrair_elementos(url, tipo, cbo, local):
+def extrair_elementos(url, tipo):
     # Opções do Chrome para execução em segundo plano
     chrome_options = Options()
     chrome_options.add_argument("--headless")  # Executar em segundo plano
@@ -31,14 +32,35 @@ def extrair_elementos(url, tipo, cbo, local):
     soup = BeautifulSoup(html, 'html.parser')
     resultados = {}
 
-    # Tags e índices predefinidos para cada tipo
     if tipo == "salario":
-        tags = {
-            'p': [0, 1, 2, 7],
-            'h2': [1, 13],
-            'table': [3],
-        }
+        # Expressão regular para capturar as partes da URL
+        padrao = r'https://www\.salario\.com\.br/profissao/([^/]+)-cbo-([0-9]+)/?(.*)'
+        match = re.match(padrao, url)
+
+        if match:
+            cargo = match.group(1).replace('-', ' ')
+            cbo = match.group(2)
+            local_info = match.group(3)  # Captura tudo após o CBO, se houver
+
+            # Determinar o tipo de local
+            if not local_info:  # Caso 1: apenas a estrutura básica (país)
+                local = ('país', 'br')
+            elif len(local_info) == 2:  # Caso 2: estado
+                local = ('estado', local_info)
+            else:  # Caso 3: cidade
+                local = ('cidade', local_info.strip('/'))
+
+            # Tags e índices predefinidos para o tipo "salario"
+            tags = {
+                'p': [0, 1, 2, 7],
+                'h2': [1, 13],
+                'table': [3],
+            }
+
     elif tipo == "dissidio":
+        cargo = url.split('/')[-2].replace('-', ' ').capitalize()
+        cbo = soup.find_all('a')[3].get_text().strip()  # Captura o cargo
+
         tags = {
             'p': [24, 26, 27, 28, 29],
             'h2': [10, 11]
@@ -55,9 +77,9 @@ def extrair_elementos(url, tipo, cbo, local):
 
     # Salva os resultados no documento específico
     if tipo == "salario":
-        arquivo = f'CBO {cbo} - {local} - Salário.docx'
+        arquivo = f'Salário {cargo} - CBO {cbo} - {local[1]}.docx'
     elif tipo == "dissidio":
-        arquivo = f'CBO {cbo} - {local} - Dissídio.docx'
+        arquivo = f'Dissídio {cargo} - {cbo}.docx'
     salvar_docx(resultados, arquivo)
 
 # Função para salvar os resultados em um arquivo .docx
@@ -72,18 +94,16 @@ def salvar_docx(resultados, arquivo):
 # Função chamada ao clicar no botão "Extrair"
 def extrair():
     urls = url_entry.get().split(',')  # Captura as URLs digitadas no campo, separando por vírgula
-    cbo = cbo_entry.get()
-    local = local_entry.get()
     tipo_selecionado = tipo_var.get()
 
-    if not cbo or not local:
-        messagebox.showerror("Erro", "Por favor, insira o CBO e o Local.")
+    if not urls:
+        messagebox.showerror("Erro", "Por favor, insira as URLs.")
         return
 
     threads = []
     for url in urls:
         url = url.strip()
-        thread = threading.Thread(target=extrair_elementos, args=(url, tipo_selecionado, cbo, local))
+        thread = threading.Thread(target=extrair_elementos, args=(url, tipo_selecionado))
         threads.append(thread)
         thread.start()
 
@@ -104,14 +124,6 @@ tipo_var = tk.StringVar(value="salario")  # Valor padrão
 tk.Label(root, text="Insira as URLs (separadas por vírgula):").grid(row=0, column=0, padx=10, pady=10)
 url_entry = tk.Entry(root, width=50)  # Campo de entrada para a URL
 url_entry.grid(row=0, column=1, padx=10, pady=5)
-
-tk.Label(root, text="CBO:").grid(row=1, column=0, padx=10, pady=10)
-cbo_entry = tk.Entry(root, width=20)  # Campo de entrada para o CBO
-cbo_entry.grid(row=1, column=1, padx=10, pady=5)
-
-tk.Label(root, text="Local:").grid(row=2, column=0, padx=10, pady=10)
-local_entry = tk.Entry(root, width=20)  # Campo de entrada para o Local
-local_entry.grid(row=2, column=1, padx=10, pady=5)
 
 # Opções de seleção para o tipo de extração
 tk.Radiobutton(root, text="Salário", variable=tipo_var, value="salario").grid(row=3, column=0, padx=10, pady=5)
