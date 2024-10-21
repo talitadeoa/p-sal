@@ -62,7 +62,7 @@ def extrair_elementos(url, tipo):
         cbo = soup.find_all('a')[3].get_text().strip()  # Captura o cargo
 
         tags = {
-            'p': [24, 26, 27, 28, 29],
+            'p': [20, 21, 23, 24, 25],
             'h2': [10, 11]
         }
 
